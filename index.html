@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A modern weather forecast app with real-time data, 5-day forecast, voice search and more." />
+    <title>Skycast — Modern Weather Forecast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body data-theme="dark">
+
+    <!-- Animated background layers -->
+    <div class="bg-layer" id="bgLayer"></div>
+    <div class="bg-overlay"></div>
+    <div class="particles" id="particles"></div>
+
+    <main class="app">
+
+        <!-- Header -->
+        <header class="topbar">
+            <div class="logo">
+                <i class="fa-solid fa-cloud-sun"></i>
+                <span>Skycast</span>
+            </div>
+
+            <div class="search-wrap">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input
+                        type="text"
+                        id="cityInput"
+                        placeholder="Search any city in the world..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                    <button id="voiceBtn" class="icon-btn" title="Voice search" aria-label="Voice search">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <button id="searchBtn" class="icon-btn primary" title="Search" aria-label="Search">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Recent searches dropdown -->
+                <div class="recent" id="recentBox" hidden>
+                    <div class="recent-head">
+                        <span><i class="fa-regular fa-clock"></i> Recent searches</span>
+                        <button id="clearRecent" class="text-btn">Clear</button>
+                    </div>
+                    <ul id="recentList"></ul>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <button id="locationBtn" class="icon-btn" title="Use my location" aria-label="Use my location">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                </button>
+                <button id="unitBtn" class="icon-btn unit-btn" title="Toggle °C / °F">
+                    <span class="unit-active">°C</span><span class="unit-sep">|</span><span>°F</span>
+                </button>
+                <button id="themeBtn" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Loading spinner -->
+        <div class="loader" id="loader" hidden>
+            <div class="spinner"></div>
+            <p>Fetching weather data...</p>
+        </div>
+
+        <!-- Error card -->
+        <div class="error-card" id="errorCard" hidden>
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <h3 id="errorTitle">Oops!</h3>
+            <p id="errorMsg">Something went wrong.</p>
+            <button id="errorRetryBtn" class="error-btn"><i class="fa-solid fa-magnifying-glass"></i> Search a city</button>
+        </div>
+
+        <!-- Welcome / empty state -->
+        <section class="welcome" id="welcome">
+            <i class="fa-solid fa-cloud-sun-rain"></i>
+            <h1>Welcome to Skycast</h1>
+            <p>Search a city, use your current location, or try voice search to see live weather, a 5-day forecast and more.</p>
+            <div class="quick-cities">
+                <button class="chip" data-city="London">London</button>
+                <button class="chip" data-city="New York">New York</button>
+                <button class="chip" data-city="Tokyo">Tokyo</button>
+                <button class="chip" data-city="Dubai">Dubai</button>
+                <button class="chip" data-city="Sydney">Sydney</button>
+                <button class="chip" data-city="Paris">Paris</button>
+            </div>
+        </section>
+
+        <!-- Main weather content -->
+        <section class="content" id="content" hidden>
+
+            <!-- Current weather hero -->
+            <div class="hero glass">
+                <div class="hero-left">
+                    <div class="location">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <h2 id="cityName">—</h2>
+                        <span class="country" id="countryName"></span>
+                    </div>
+                    <p class="date" id="dateText"></p>
+
+                    <div class="temp-block">
+                        <div id="weatherIcon" class="weather-icon-hero" aria-label="weather icon"></div>
+                        <div>
+                            <h1 class="temp"><span id="tempValue">--</span><sup id="tempUnit">°C</sup></h1>
+                            <p class="condition" id="condition">—</p>
+                        </div>
+                    </div>
+
+                    <p class="feels">Feels like <span id="feelsLike">--°</span> • <span id="minMax">--° / --°</span></p>
+                </div>
+
+                <div class="hero-right">
+                    <div class="metric">
+                        <i class="fa-solid fa-droplet"></i>
+                        <div>
+                            <span class="metric-label">Humidity</span>
+                            <span class="metric-value" id="humidity">--%</span>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <i class="fa-solid fa-wind"></i>
+                        <div>
+                            <span class="metric-label">Wind</span>
+                            <span class="metric-value" id="wind">-- km/h</span>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <div>
+                            <span class="metric-label">Pressure</span>
+                            <span class="metric-value" id="pressure">-- hPa</span>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <i class="fa-solid fa-eye"></i>
+                        <div>
+                            <span class="metric-label">Visibility</span>
+                            <span class="metric-value" id="visibility">-- km</span>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <i class="fa-solid fa-sun"></i>
+                        <div>
+                            <span class="metric-label">Sunrise</span>
+                            <span class="metric-value" id="sunrise">--:--</span>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <i class="fa-solid fa-cloud-moon"></i>
+                        <div>
+                            <span class="metric-label">Sunset</span>
+                            <span class="metric-value" id="sunset">--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 day forecast -->
+            <div class="forecast-wrap">
+                <h3 class="section-title"><i class="fa-solid fa-calendar-days"></i> 5-Day Forecast</h3>
+                <div class="forecast" id="forecast"></div>
+            </div>
+
+            <!-- Hourly forecast -->
+            <div class="hourly-wrap">
+                <h3 class="section-title"><i class="fa-regular fa-clock"></i> Next 24 Hours</h3>
+                <div class="hourly" id="hourly"></div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>Made with <i class="fa-solid fa-heart"></i> using Open-Meteo API</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
